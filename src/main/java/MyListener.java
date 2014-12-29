@@ -2,26 +2,28 @@ import org.pircbotx.Configuration;
 import org.pircbotx.PircBotX;
 import org.pircbotx.User;
 import org.pircbotx.hooks.ListenerAdapter;
+import org.pircbotx.hooks.events.MessageEvent;
 import org.pircbotx.hooks.types.GenericMessageEvent;
 import org.pircbotx.output.OutputChannel;
 
 import java.io.*;
 import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 public class MyListener extends ListenerAdapter {
     public static OutputChannel outputChannel;
+    public static PircBotX bot;
 
     public static ArrayList<String> autorized = new ArrayList<String>();
     public static HashMap<String, String> voxel = new HashMap<String, String>();
 
     @Override
     public void onGenericMessage(GenericMessageEvent event) {
+        parse(event);
+    }
+
+    private static void parse(GenericMessageEvent event) {
         if(event.getMessage().startsWith("??> ") && isAutorized(event.getUser())) {
             outputChannel.message(getVoxel1(event.getMessage()));
         } else if(event.getMessage().startsWith("?? ") && isAutorized(event.getUser())) {
@@ -46,7 +48,7 @@ public class MyListener extends ListenerAdapter {
                 } else if (event.getMessage().startsWith(".msguser")) {
                     event.getBot().sendIRC().message(getArray(event.getMessage()).split(" ")[0], getArray(getArray(event.getMessage())));
                 } else if (event.getMessage().startsWith(".act")) {
-                    event.getBot().sendIRC().action("#mchelptraining", getArray(event.getMessage()));
+                    event.getBot().sendIRC().action("#urielsalisbottest", getArray(event.getMessage()));
                 } else if (event.getMessage().startsWith(".auth")) {
                     autorized.add(getArray(event.getMessage()).substring(0, getArray(event.getMessage()).length() - 1));
                     outputChannel.message("Authorized " + getArray(event.getMessage()) + "by " + event.getUser().getNick());
@@ -64,7 +66,9 @@ public class MyListener extends ListenerAdapter {
         }
     }
 
-    private String getVoxel2(String message) {
+
+
+    private static String getVoxel2(String message) {
         String str = message.substring(3);
         System.out.println(str);
         String[] strs = str.split(" ");
@@ -73,7 +77,7 @@ public class MyListener extends ListenerAdapter {
         return getHash(strs[1]);
     }
 
-    private String getVoxel1(String message) { //line input by user
+    private static String getVoxel1(String message) { //line input by user
         String str = message.substring(4);
         System.out.println(str);
         String[] strs = str.split(" ");
@@ -82,7 +86,7 @@ public class MyListener extends ListenerAdapter {
         return getHash(strs[1]);
     }
 
-    private String getHash(String str) { //looks for it in the hashmap
+    private static String getHash(String str) { //looks for it in the hashmap
         for(Map.Entry<String, String> entry:voxel.entrySet()) {
             System.out.println(entry.getKey());
             if(str.equals(entry.getKey())) {
@@ -94,7 +98,7 @@ public class MyListener extends ListenerAdapter {
         return "Not found";
     }
 
-    private String getArray2() {
+    private static String getArray2() {
         if(autorized.size() > 1) {
             String str2 = "";
             for (String str : autorized) {
@@ -106,7 +110,7 @@ public class MyListener extends ListenerAdapter {
         }
     }
 
-    private void save() throws IOException {
+    private static void save() throws IOException {
         ObjectOutputStream fileOut = new ObjectOutputStream(new FileOutputStream("save"));
         fileOut.writeObject(autorized);
         fileOut.close();
@@ -114,14 +118,14 @@ public class MyListener extends ListenerAdapter {
 
     }
 
-    private boolean isAutorized(User user) {
+    private static boolean isAutorized(User user) {
         for(String str:autorized) {
             if(user.getNick().equals(str)) return true;
         }
         return false;
     }
 
-    private String getArray(String message) {
+    private static String getArray(String message) {
         String[] strs = message.split(" ");
         strs = Arrays.copyOfRange(strs, 1, strs.length);
         String str2 = "";
@@ -138,13 +142,13 @@ public class MyListener extends ListenerAdapter {
                 .setName("TestBot") //Set the nick of the bot. CHANGE IN YOUR CODE
                 .setLogin("testboturielsalis")
                 .setServerHostname("irc.esper.net") //Join the freenode network
-                .addAutoJoinChannel("#mchelptraining") //Join the official #pircbotx channel
+                .addAutoJoinChannel("#urielsalisbottest") //Join the official #pircbotx channel
                 .addListener(new MyListener()) //Add our listener that will be called on Events
                 .buildConfiguration();
 
         //Create our bot with the configuration
-        PircBotX bot = new PircBotX(configuration);
-        outputChannel = new OutputChannel(bot, bot.getUserChannelDao().getChannel("#mchelptraining"));
+        bot = new PircBotX(configuration);
+        outputChannel = new OutputChannel(bot, bot.getUserChannelDao().getChannel("#urielsalisbottest"));
         autorized.add("urielsalis");
         //Connect to the server
         try {
@@ -152,6 +156,18 @@ public class MyListener extends ListenerAdapter {
         } catch (Exception ignored) {
 
         }
+        new Thread(){
+            @Override
+            public void run() {
+                while (true) {
+                    Scanner scanner = new Scanner(System.in);
+                    if(scanner.hasNextLine()) {
+                        parse(new MessageEvent(bot, bot.getUserChannelDao().getChannel("#urielsalisbottest"), bot.getUserBot(), scanner.nextLine()));
+                    }
+                    Thread.yield();
+                }
+            }
+        }.start();
         bot.startBot();
     }
 
