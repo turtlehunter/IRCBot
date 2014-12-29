@@ -23,7 +23,11 @@ public class MyListener extends ListenerAdapter {
     @Override
     public void onGenericMessage(GenericMessageEvent event) {
         if(event.getMessage().startsWith("??> ") && isAutorized(event.getUser())) {
-            outputChannel.message(getVoxel(event.getMessage()));
+            outputChannel.message(getVoxel1(event.getMessage()));
+        } else if(event.getMessage().startsWith("?? ") && isAutorized(event.getUser())) {
+            outputChannel.message(getVoxel2(event.getMessage()));
+        } else if(event.getMessage().startsWith("??<") && isAutorized(event.getUser())) {
+            event.getUser().send().message(getVoxel1(event.getMessage()));
         }
         if(event.getMessage().startsWith(".")) {
             if (isAutorized(event.getUser())) {
@@ -60,7 +64,16 @@ public class MyListener extends ListenerAdapter {
         }
     }
 
-    private String getVoxel(String message) { //line input by user
+    private String getVoxel2(String message) {
+        String str = message.substring(3);
+        System.out.println(str);
+        String[] strs = str.split(" ");
+        System.out.println(strs[1]);
+        System.out.println(strs[0]);
+        return getHash(strs[1]);
+    }
+
+    private String getVoxel1(String message) { //line input by user
         String str = message.substring(4);
         System.out.println(str);
         String[] strs = str.split(" ");
@@ -125,7 +138,7 @@ public class MyListener extends ListenerAdapter {
                 .setName("TestBot") //Set the nick of the bot. CHANGE IN YOUR CODE
                 .setLogin("testboturielsalis")
                 .setServerHostname("irc.esper.net") //Join the freenode network
-                .addAutoJoinChannel("#testboturielsalis") //Join the official #pircbotx channel
+                .addAutoJoinChannel("#mchelptraining") //Join the official #pircbotx channel
                 .addListener(new MyListener()) //Add our listener that will be called on Events
                 .buildConfiguration();
 
@@ -172,7 +185,7 @@ public class MyListener extends ListenerAdapter {
     }
 
     private static void process(String line) {
-        String[] f = line.split("|");
+        String[] f = line.split("\\|");
         voxel.put(f[0], f[1]);
     }
 }
