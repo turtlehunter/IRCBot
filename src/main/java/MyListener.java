@@ -31,25 +31,25 @@ public class MyListener extends ListenerAdapter {
         } else if(event.getMessage().startsWith("??<") && isAutorized(event.getUser())) {
             event.getUser().send().message(getVoxel1(event.getMessage()));
         }
-        if(event.getMessage().startsWith(".")) {
+        if(event.getMessage().startsWith("$")) {
             if (isAutorized(event.getUser())) {
-                if (event.getMessage().startsWith(".nick")) {
+                if (event.getMessage().startsWith("$nick")) {
                     event.respond("Changing nick");
                     event.getBot().sendIRC().changeNick(event.getMessage().split(" ")[1]);
-                } else if (event.getMessage().startsWith(".msg")) {
+                } else if (event.getMessage().startsWith("$msg")) {
                     outputChannel.message(getArray(event.getMessage()));
-                } else if (event.getMessage().startsWith(".leave")) {
+                } else if (event.getMessage().startsWith("$leave")) {
                     try {
                         save();
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
                     event.getBot().sendIRC().quitServer();
-                } else if (event.getMessage().startsWith(".msguser")) {
+                } else if (event.getMessage().startsWith("$msguser")) {
                     event.getBot().sendIRC().message(getArray(event.getMessage()).split(" ")[0], getArray(getArray(event.getMessage())));
-                } else if (event.getMessage().startsWith(".act")) {
-                    event.getBot().sendIRC().action("#urielsalisbottest", getArray(event.getMessage()));
-                } else if (event.getMessage().startsWith(".auth")) {
+                } else if (event.getMessage().startsWith("$act")) {
+                    event.getBot().sendIRC().action("#mchelptraining", getArray(event.getMessage()));
+                } else if (event.getMessage().startsWith("$auth")) {
                     autorized.add(getArray(event.getMessage()).substring(0, getArray(event.getMessage()).length() - 1));
                     outputChannel.message("Authorized " + getArray(event.getMessage()) + "by " + event.getUser().getNick());
                     try {
@@ -57,9 +57,9 @@ public class MyListener extends ListenerAdapter {
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
-                } else if (event.getMessage().startsWith(".help")) {
-                    outputChannel.message("Commands: .nick, .msg, .leave, .act, .help");
-                } else if (event.getMessage().startsWith(".getAuths")) {
+                } else if (event.getMessage().startsWith("$help")) {
+                    outputChannel.message("Commands: $nick, $msg, $leave, $act, $help, voxelhead commands");
+                } else if (event.getMessage().startsWith("$getAuths")) {
                     outputChannel.message(getArray2());
                 }
             }
@@ -72,9 +72,14 @@ public class MyListener extends ListenerAdapter {
         String str = message.substring(3);
         System.out.println(str);
         String[] strs = str.split(" ");
-        System.out.println(strs[1]);
-        System.out.println(strs[0]);
-        return getHash(strs[1]);
+        if(strs.length > 2) {
+            System.out.println(strs[1]);
+            System.out.println(strs[0]);
+            return getHash(strs[1]);
+        } else {
+            return getHash(str);
+        }
+
     }
 
     private static String getVoxel1(String message) { //line input by user
@@ -142,13 +147,13 @@ public class MyListener extends ListenerAdapter {
                 .setName("TestBot") //Set the nick of the bot. CHANGE IN YOUR CODE
                 .setLogin("testboturielsalis")
                 .setServerHostname("irc.esper.net") //Join the freenode network
-                .addAutoJoinChannel("#urielsalisbottest") //Join the official #pircbotx channel
+                .addAutoJoinChannel("#mchelptraining") //Join the official #pircbotx channel
                 .addListener(new MyListener()) //Add our listener that will be called on Events
                 .buildConfiguration();
 
         //Create our bot with the configuration
         bot = new PircBotX(configuration);
-        outputChannel = new OutputChannel(bot, bot.getUserChannelDao().getChannel("#urielsalisbottest"));
+        outputChannel = new OutputChannel(bot, bot.getUserChannelDao().getChannel("#mchelptraining"));
         autorized.add("urielsalis");
         //Connect to the server
         try {
@@ -162,7 +167,7 @@ public class MyListener extends ListenerAdapter {
                 while (true) {
                     Scanner scanner = new Scanner(System.in);
                     if(scanner.hasNextLine()) {
-                        parse(new MessageEvent(bot, bot.getUserChannelDao().getChannel("#urielsalisbottest"), bot.getUserBot(), scanner.nextLine()));
+                        parse(new MessageEvent(bot, bot.getUserChannelDao().getChannel("#mchelptraining"), bot.getUserBot(), scanner.nextLine()));
                     }
                     Thread.yield();
                 }
@@ -172,7 +177,7 @@ public class MyListener extends ListenerAdapter {
     }
 
     private static void load() throws IOException, ClassNotFoundException {
-        ObjectInputStream fileIn = new ObjectInputStream(new FileInputStream("file"));
+        ObjectInputStream fileIn = new ObjectInputStream(new FileInputStream("save"));
         autorized = (ArrayList<String>) fileIn.readObject();
         fileIn.close();
 
