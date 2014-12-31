@@ -1,3 +1,4 @@
+import org.pircbotx.Colors;
 import org.pircbotx.Configuration;
 import org.pircbotx.PircBotX;
 import org.pircbotx.User;
@@ -17,13 +18,14 @@ public class MyListener extends ListenerAdapter {
 
     public static ArrayList<String> autorized = new ArrayList<String>();
     public static HashMap<String, String> voxel = new HashMap<String, String>();
+    private String botName = "UrielBot";
 
     @Override
     public void onGenericMessage(GenericMessageEvent event) {
         parse(event);
     }
 
-    private static void parse(GenericMessageEvent event) {
+    private void parse(GenericMessageEvent event) {
         if(event.getMessage().startsWith("??> ") && isAutorized(event.getUser())) {
             outputChannel.message(getVoxel1(event.getMessage()));
         } else if(event.getMessage().startsWith("?? ") && isAutorized(event.getUser())) {
@@ -36,6 +38,7 @@ public class MyListener extends ListenerAdapter {
                 if (event.getMessage().startsWith("$nick")) {
                     event.respond("Changing nick");
                     event.getBot().sendIRC().changeNick(event.getMessage().split(" ")[1]);
+                    botName = event.getMessage().split(" ")[1];
                 } else if (event.getMessage().startsWith("$msg")) {
                     outputChannel.message(getArray(event.getMessage()));
                 } else if (event.getMessage().startsWith("$leave")) {
@@ -58,15 +61,13 @@ public class MyListener extends ListenerAdapter {
                         e.printStackTrace();
                     }
                 } else if (event.getMessage().startsWith("$help")) {
-                    outputChannel.message("Commands: $nick, $msg, $leave, $act, $help, voxelhead commands");
+                    outputChannel.message("Commands: $nick, $msg, $leave, $act, $help, voxelhead commands. PangeaBot commands (some) : .dx, .help, .m");
                 } else if (event.getMessage().startsWith("$getAuths")) {
                     outputChannel.message(getArray2());
                 }
             }
         }
     }
-
-
 
     private static String getVoxel2(String message) {
         String str = message.substring(3);
@@ -144,8 +145,8 @@ public class MyListener extends ListenerAdapter {
         //Configure what we want our bot to do
         download();
         Configuration configuration = new Configuration.Builder()
-                .setName("TestBot") //Set the nick of the bot. CHANGE IN YOUR CODE
-                .setLogin("testboturielsalis")
+                .setName("UrielBot") //Set the nick of the bot. CHANGE IN YOUR CODE
+                .setLogin("boturielsalis")
                 .setServerHostname("irc.esper.net") //Join the freenode network
                 .addAutoJoinChannel("#mchelptraining") //Join the official #pircbotx channel
                 .addListener(new MyListener()) //Add our listener that will be called on Events
@@ -161,19 +162,9 @@ public class MyListener extends ListenerAdapter {
         } catch (Exception ignored) {
 
         }
-        new Thread(){
-            @Override
-            public void run() {
-                while (true) {
-                    Scanner scanner = new Scanner(System.in);
-                    if(scanner.hasNextLine()) {
-                        parse(new MessageEvent(bot, bot.getUserChannelDao().getChannel("#mchelptraining"), bot.getUserBot(), scanner.nextLine()));
-                    }
-                    Thread.yield();
-                }
-            }
-        }.start();
         bot.startBot();
+        bot.sendIRC().identify("nopass");
+
     }
 
     private static void load() throws IOException, ClassNotFoundException {
